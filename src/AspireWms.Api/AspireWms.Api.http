@@ -1,0 +1,166 @@
+### AspireWms API - Manual Testing
+### Use with REST Client extension (VS Code) or Visual Studio
+
+# ============================================================
+# CONFIGURATION
+# ============================================================
+# Direct API access (bypasses YARP gateway)
+@api = http://localhost:5299
+
+# Via YARP Gateway (recommended - matches production routing)
+@gateway = http://localhost:5000
+
+# Choose which base URL to use
+@baseUrl = {{gateway}}
+
+# ============================================================
+# HEALTH & INFO
+# ============================================================
+
+### API Root Info
+GET {{baseUrl}}/api
+Accept: application/json
+
+### Inventory Module Health
+GET {{baseUrl}}/api/inventory/health
+Accept: application/json
+
+### Inbound Module Health
+GET {{baseUrl}}/api/inbound/health
+Accept: application/json
+
+### Outbound Module Health
+GET {{baseUrl}}/api/outbound/health
+Accept: application/json
+
+### Direct API Health Check
+GET {{api}}/health
+Accept: application/json
+
+# ============================================================
+# PRODUCTS (Inventory Module)
+# ============================================================
+
+### List All Products
+GET {{baseUrl}}/api/inventory/products
+Accept: application/json
+
+### List All Products (including inactive)
+GET {{baseUrl}}/api/inventory/products?includeInactive=true
+Accept: application/json
+
+### Get Product by ID
+# Replace with actual product ID from list response
+@productId = 00000000-0000-0000-0000-000000000000
+GET {{baseUrl}}/api/inventory/products/{{productId}}
+Accept: application/json
+
+### Create New Product
+POST {{baseUrl}}/api/inventory/products
+Content-Type: application/json
+
+{
+  "sku": "TEST-001",
+  "name": "Test Product",
+  "description": "A test product for manual testing",
+  "weight": 1.5,
+  "length": 10.0,
+  "width": 5.0,
+  "height": 2.0
+}
+
+### Update Product
+# Replace productId with actual ID
+PUT {{baseUrl}}/api/inventory/products/{{productId}}
+Content-Type: application/json
+
+{
+  "id": "{{productId}}",
+  "name": "Updated Product Name",
+  "description": "Updated description",
+  "weight": 2.0,
+  "length": 15.0,
+  "width": 8.0,
+  "height": 3.0
+}
+
+# ============================================================
+# LOCATIONS (Inventory Module)
+# ============================================================
+
+### List All Locations
+GET {{baseUrl}}/api/inventory/locations
+Accept: application/json
+
+### List Locations by Zone
+GET {{baseUrl}}/api/inventory/locations?zone=A
+Accept: application/json
+
+### List Locations (including inactive)
+GET {{baseUrl}}/api/inventory/locations?includeInactive=true
+Accept: application/json
+
+### Create New Location
+POST {{baseUrl}}/api/inventory/locations
+Content-Type: application/json
+
+{
+  "zone": "D",
+  "aisle": 1,
+  "rack": 1,
+  "bin": 1,
+  "name": "New Test Location",
+  "capacity": 100
+}
+
+# ============================================================
+# STOCK (Inventory Module)
+# ============================================================
+
+### Get Stock Level for Product
+# Replace with actual product ID
+GET {{baseUrl}}/api/inventory/stock/{{productId}}
+Accept: application/json
+
+### Get Stock Movement History
+# Replace with actual product ID
+GET {{baseUrl}}/api/inventory/stock/{{productId}}/movements
+Accept: application/json
+
+### Get Stock Movement History (with limit)
+GET {{baseUrl}}/api/inventory/stock/{{productId}}/movements?limit=10
+Accept: application/json
+
+### Adjust Stock (Add)
+# Replace productId and locationId with actual IDs
+@locationId = 00000000-0000-0000-0000-000000000000
+POST {{baseUrl}}/api/inventory/stock/adjust
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}",
+  "locationId": "{{locationId}}",
+  "adjustment": 10,
+  "reason": "Manual stock adjustment - adding inventory"
+}
+
+### Adjust Stock (Remove)
+POST {{baseUrl}}/api/inventory/stock/adjust
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}",
+  "locationId": "{{locationId}}",
+  "adjustment": -5,
+  "reason": "Manual stock adjustment - removing damaged items"
+}
+
+# ============================================================
+# WORKFLOW: Complete Test Scenario
+# ============================================================
+# 1. List products to get a productId
+# 2. List locations to get a locationId  
+# 3. Get stock level for product
+# 4. Adjust stock
+# 5. Check movement history
+# ============================================================
