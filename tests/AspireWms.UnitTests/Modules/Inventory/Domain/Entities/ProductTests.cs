@@ -91,7 +91,7 @@ public sealed class ProductTests
 
         // Assert
         await Assert.That(result.IsFailure).IsTrue();
-        await Assert.That(result.Error.Message).Contains("Dimensions cannot be negative");
+        await Assert.That(result.Error.Message).Contains("cannot be negative");
     }
 
     [Test]

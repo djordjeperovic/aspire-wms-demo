@@ -1,4 +1,5 @@
 using AspireWms.Api.Shared.Domain;
+using AspireWms.Api.Shared.Domain.ValueObjects;
 
 namespace AspireWms.Api.Modules.Inventory.Domain.Entities;
 
@@ -11,9 +12,7 @@ public sealed class Product : Entity<Guid>
     public string Name { get; private set; } = string.Empty;
     public string? Description { get; private set; }
     public decimal Weight { get; private set; }
-    public decimal Length { get; private set; }
-    public decimal Width { get; private set; }
-    public decimal Height { get; private set; }
+    public Dimensions Dimensions { get; private set; } = default!;
     public bool IsActive { get; private set; }
 
     private readonly List<InventoryItem> _inventoryItems = [];
@@ -22,16 +21,14 @@ public sealed class Product : Entity<Guid>
     private Product() : base() { }
 
     private Product(Guid id, string sku, string name, string? description,
-        decimal weight, decimal length, decimal width, decimal height)
+        decimal weight, Dimensions dimensions)
         : base(id)
     {
         Sku = sku;
         Name = name;
         Description = description;
         Weight = weight;
-        Length = length;
-        Width = width;
-        Height = height;
+        Dimensions = dimensions;
         IsActive = true;
     }
 
@@ -59,8 +56,9 @@ public sealed class Product : Entity<Guid>
         if (weight < 0)
             return Error.Validation("Product.Weight", "Weight cannot be negative.");
 
-        if (length < 0 || width < 0 || height < 0)
-            return Error.Validation("Product.Dimensions", "Dimensions cannot be negative.");
+        var dimensionsResult = Dimensions.Create(length, width, height);
+        if (dimensionsResult.IsFailure)
+            return dimensionsResult.Error;
 
         return new Product(
             Guid.NewGuid(),
@@ -68,9 +66,7 @@ public sealed class Product : Entity<Guid>
             name.Trim(),
             description?.Trim(),
             weight,
-            length,
-            width,
-            height);
+            dimensionsResult.Value);
     }
 
     public Result Update(
@@ -90,15 +86,14 @@ public sealed class Product : Entity<Guid>
         if (weight < 0)
             return Error.Validation("Product.Weight", "Weight cannot be negative.");
 
-        if (length < 0 || width < 0 || height < 0)
-            return Error.Validation("Product.Dimensions", "Dimensions cannot be negative.");
+        var dimensionsResult = Dimensions.Create(length, width, height);
+        if (dimensionsResult.IsFailure)
+            return dimensionsResult.Error;
 
         Name = name.Trim();
         Description = description?.Trim();
         Weight = weight;
-        Length = length;
-        Width = width;
-        Height = height;
+        Dimensions = dimensionsResult.Value;
         MarkUpdated();
 
         return Result.Success();
@@ -119,5 +114,5 @@ public sealed class Product : Entity<Guid>
     /// <summary>
     /// Volume in cubic units (length × width × height).
     /// </summary>
-    public decimal Volume => Length * Width * Height;
+    public decimal Volume => Dimensions.Volume;
 }

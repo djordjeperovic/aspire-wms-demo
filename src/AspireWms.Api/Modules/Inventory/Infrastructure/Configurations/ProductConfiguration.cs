@@ -38,17 +38,20 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasColumnName("weight")
             .HasPrecision(10, 3);
 
-        builder.Property(p => p.Length)
-            .HasColumnName("length")
-            .HasPrecision(10, 3);
+        builder.OwnsOne(p => p.Dimensions, dimensions =>
+        {
+            dimensions.Property(d => d.Length)
+                .HasColumnName("length")
+                .HasPrecision(10, 3);
 
-        builder.Property(p => p.Width)
-            .HasColumnName("width")
-            .HasPrecision(10, 3);
+            dimensions.Property(d => d.Width)
+                .HasColumnName("width")
+                .HasPrecision(10, 3);
 
-        builder.Property(p => p.Height)
-            .HasColumnName("height")
-            .HasPrecision(10, 3);
+            dimensions.Property(d => d.Height)
+                .HasColumnName("height")
+                .HasPrecision(10, 3);
+        });
 
         builder.Property(p => p.IsActive)
             .HasColumnName("is_active")
