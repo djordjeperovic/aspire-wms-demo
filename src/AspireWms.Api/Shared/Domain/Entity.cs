@@ -1,4 +1,4 @@
-namespace AspireWms.Api.Modules.Inventory.Domain.Entities;
+namespace AspireWms.Api.Shared.Domain;
 
 /// <summary>
 /// Base class for all domain entities with typed ID and audit fields.

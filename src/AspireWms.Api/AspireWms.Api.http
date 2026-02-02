@@ -156,7 +156,139 @@ Content-Type: application/json
 }
 
 # ============================================================
-# WORKFLOW: Complete Test Scenario
+# PURCHASE ORDERS (Inbound Module)
+# ============================================================
+
+### List All Purchase Orders
+GET {{baseUrl}}/api/inbound/purchase-orders
+Accept: application/json
+
+### List Purchase Orders by Status (Pending)
+GET {{baseUrl}}/api/inbound/purchase-orders?status=Pending
+Accept: application/json
+
+### List Purchase Orders by Status (PartiallyReceived)
+GET {{baseUrl}}/api/inbound/purchase-orders?status=PartiallyReceived
+Accept: application/json
+
+### List Purchase Orders by Status (Received)
+GET {{baseUrl}}/api/inbound/purchase-orders?status=Received
+Accept: application/json
+
+### List Purchase Orders by Status (Cancelled)
+GET {{baseUrl}}/api/inbound/purchase-orders?status=Cancelled
+Accept: application/json
+
+### Get Purchase Order by ID
+# Replace with actual purchase order ID from list response
+@purchaseOrderId = 00000000-0000-0000-0000-000000000000
+GET {{baseUrl}}/api/inbound/purchase-orders/{{purchaseOrderId}}
+Accept: application/json
+
+### Create New Purchase Order
+POST {{baseUrl}}/api/inbound/purchase-orders
+Content-Type: application/json
+
+{
+  "orderNumber": "PO-2026-001",
+  "supplierName": "Acme Widgets Inc.",
+  "expectedDeliveryDate": "2026-02-15",
+  "notes": "Standard delivery",
+  "lines": [
+    {
+      "productId": "{{productId}}",
+      "quantity": 100,
+      "unitCostAmount": 12.50,
+      "unitCostCurrency": "USD"
+    }
+  ]
+}
+
+### Create Purchase Order with Multiple Lines
+POST {{baseUrl}}/api/inbound/purchase-orders
+Content-Type: application/json
+
+{
+  "orderNumber": "PO-2026-002",
+  "supplierName": "Global Supplies Ltd.",
+  "expectedDeliveryDate": "2026-02-20",
+  "notes": "Bulk order - handle with care",
+  "lines": [
+    {
+      "productId": "{{productId}}",
+      "quantity": 50,
+      "unitCostAmount": 25.00,
+      "unitCostCurrency": "USD"
+    }
+  ]
+}
+
+# ============================================================
+# RECEIPTS (Inbound Module)
+# ============================================================
+
+### List All Receipts
+GET {{baseUrl}}/api/inbound/receipts
+Accept: application/json
+
+### List Receipts for Purchase Order
+GET {{baseUrl}}/api/inbound/receipts?purchaseOrderId={{purchaseOrderId}}
+Accept: application/json
+
+### Get Receipt by ID
+# Replace with actual receipt ID from list response
+@receiptId = 00000000-0000-0000-0000-000000000000
+GET {{baseUrl}}/api/inbound/receipts/{{receiptId}}
+Accept: application/json
+
+### Create Receipt (Full Receipt)
+# Replace purchaseOrderLineId with actual line ID from purchase order
+@purchaseOrderLineId = 00000000-0000-0000-0000-000000000000
+POST {{baseUrl}}/api/inbound/receipts
+Content-Type: application/json
+
+{
+  "purchaseOrderId": "{{purchaseOrderId}}",
+  "receivedAt": "2026-02-15T10:30:00Z",
+  "notes": "Full delivery received in good condition",
+  "lines": [
+    {
+      "purchaseOrderLineId": "{{purchaseOrderLineId}}",
+      "quantityReceived": 100
+    }
+  ]
+}
+
+### Create Receipt (Partial Receipt)
+POST {{baseUrl}}/api/inbound/receipts
+Content-Type: application/json
+
+{
+  "purchaseOrderId": "{{purchaseOrderId}}",
+  "receivedAt": "2026-02-15T14:00:00Z",
+  "notes": "Partial delivery - remaining items on backorder",
+  "lines": [
+    {
+      "purchaseOrderLineId": "{{purchaseOrderLineId}}",
+      "quantityReceived": 50
+    }
+  ]
+}
+
+# ============================================================
+# WORKFLOW: Complete Inbound Test Scenario
+# ============================================================
+# 1. Create a product (if needed)
+# 2. Create a purchase order with the product
+# 3. List purchase orders to verify creation
+# 4. Get the purchase order details to get line IDs
+# 5. Create a receipt for the purchase order
+# 6. List receipts to verify
+# 7. Get purchase order again to see updated received quantities
+# ============================================================
+
+# ============================================================
+# WORKFLOW: Complete Inventory Test Scenario
 # ============================================================
 # 1. List products to get a productId
 # 2. List locations to get a locationId  

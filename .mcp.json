@@ -8,8 +8,10 @@
       ]
     },
     "playwright": {
-      "command": "npx",
+      "command": "cmd",
       "args": [
+        "/c",
+        "npx",
         "-y",
         "@playwright/mcp@latest"
       ]

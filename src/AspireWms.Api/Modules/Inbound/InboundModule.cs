@@ -1,4 +1,8 @@
+using AspireWms.Api.Modules.Inbound.Features.PurchaseOrders;
+using AspireWms.Api.Modules.Inbound.Features.Receipts;
+using AspireWms.Api.Modules.Inbound.Infrastructure;
 using AspireWms.Api.Shared.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspireWms.Api.Modules.Inbound;
 
@@ -9,9 +13,21 @@ public sealed class InboundModule : IModule
 {
     public static IServiceCollection RegisterServices(IServiceCollection services, IConfiguration configuration)
     {
-        // Module-specific services will be registered here
-        // e.g., services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
-        
+        services.AddDbContext<InboundDbContext>(options =>
+        {
+            var connectionString = configuration.GetConnectionString("wmsdb");
+            options.UseNpgsql(connectionString, npgsql =>
+            {
+                npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "inbound");
+            });
+        });
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("redis");
+            options.InstanceName = "inbound:";
+        });
+
         return services;
     }
 
@@ -27,9 +43,8 @@ public sealed class InboundModule : IModule
             timestamp = DateTime.UtcNow
         }));
 
-        // Feature endpoints will be added here as vertical slices
-        // e.g., PurchaseOrders.MapEndpoints(group);
-        //       Receiving.MapEndpoints(group);
+        PurchaseOrderEndpoints.Map(group);
+        ReceiptEndpoints.Map(group);
 
         return endpoints;
     }
